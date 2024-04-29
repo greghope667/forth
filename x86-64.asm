@@ -421,7 +421,7 @@ CODE	"2aligned", two_aligned
 
 CODE	"str>num", str_to_num
 	; ( caddr u -- n 1 | 0 )
-	; (edi ptr) (eax converted) (ebx len) (cl char) (dl sign flag) (r8d base)
+	; (edi ptr) (eax converted) (ebx len) (cl char) (r9b sign flag) (r8d base)
 	pop	rdi			; ptr num
 	test	ebx, ebx		; if length = 0
 	jz	.reject			;    then abort
@@ -429,16 +429,15 @@ CODE	"str>num", str_to_num
 	xor	eax, eax		; conversion result
 	mov	r8d, [var_base]
 
-	xor	edx, edx		; sign bit, start positive
+	xor	r9d, r9d		; sign bit, start positive
+	xor	ecx, ecx		; zero upper part of cl
 	mov	cl, [rdi]		; lead character
 	cmp	cl, '-'			; if doesn't start with '-'
-	jne	.positive		;    then don't set sign bit
-	inc	edx			; set sign bit
+	jne	.loop			;    then don't set sign bit
+	inc	r9d			; set sign bit
 	inc	edi			; skip sign char
 	dec	ebx
 	jz	.reject			; if length = 0 then abort
-.positive:
-	xor	ecx, ecx		; zero upper part of cl
 .loop:
 	mov	cl, [rdi]		; next character
 	sub	cl, '0'
@@ -455,7 +454,7 @@ CODE	"str>num", str_to_num
 	dec	ebx
 	jne	.loop
 
-	test	dl, dl			; if sign bit set
+	test	r9b, r9b		; if sign bit set
 	je	@f
 	neg	eax			; then negate return value
 @@:     push	rax			; return conversion result
