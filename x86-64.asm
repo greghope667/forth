@@ -679,10 +679,10 @@ COLON	"lookup", lookup
 .done:	dd	_nip, _e
 
 COLON	"lookup-buffer", lookup_buffer
-	dd	_here, _dt_name, _e
+	dd	_here, _aligned, _dt_name, _e
 
 COLON	"prepare-word", prepare_word
-	dd	_align, _lookup_buffer, _to_r
+	dd	_lookup_buffer, _to_r
 	dd	_l, 30, _min
 	dd	_dup, _r_fetch, _c_store
 	dd	_r_fetch, _one_plus, _swap, _move, _r_from, _e

@@ -27,10 +27,10 @@ variable dictionary
 		dt>next
 	repeat then nip ;
 
-: lookup-buffer here dt>name ;
+: lookup-buffer here aligned dt>name ;
 
 : prepare-word ( caddr u -- caddr )
-	align lookup-buffer >r
+	lookup-buffer >r
 	30 min
 	dup r@ c!
 	r@ 1+ swap move r> ;
