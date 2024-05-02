@@ -168,6 +168,10 @@ CODE	"sp!", sp_store
 	pop	rbx
 	NEXT
 
+CODE	"pick", pick
+	mov	ebx, [rsp + 8*rbx]
+	NEXT
+
 ; Return stack operations
 
 CODE	">r", to_r
@@ -354,6 +358,18 @@ CODE	"-", minus
 	sub	ebx, eax
 	NEXT
 
+CODE	"rshift", rshift
+	mov	ecx, ebx
+	pop	rbx
+	shr	ebx, cl
+	NEXT
+
+CODE	"lshift", lshift
+	mov	ecx, ebx
+	pop	rbx
+	sal	ebx, cl
+	NEXT
+
 CODE	"max", max
 	pop	rax
 	cmp	ebx, eax
@@ -406,6 +422,7 @@ CODE	name, xt_name
 BINCOMP	"=", equals, sete
 BINCOMP	"<>", not_equals, setne
 BINCOMP	"<", less, setl
+BINCOMP	">", greater, setg
 
 CODE	"aligned", aligned
 	add	ebx, 3

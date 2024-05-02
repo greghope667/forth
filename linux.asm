@@ -10,6 +10,7 @@ text:
 file	"4th/parsing.4th"
 file	"4th/control-flow.4th"
 file	"4th/io.4th"
+file	"4th/stack.4th"
 text_size = $ - text
 
 CODE	"bye",bye
