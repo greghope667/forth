@@ -386,6 +386,10 @@ CODE	"2*", two_times
 	sal	ebx, 1
 	NEXT
 
+CODE	"2/", two_divide
+	sar	ebx, 1
+	NEXT
+
 macro UNARYOPP name*, xt_name*, opp* {
 CODE	name, xt_name
 	opp	ebx
