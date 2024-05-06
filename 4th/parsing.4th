@@ -1,4 +1,4 @@
-: immediate 1 latest 4 + c! ;
+: immediate 1 latest dt>flags c! ;
 : postpone ' , ; immediate
 : ['] ' postpone literal ; immediate
 : char bl word 1+ c@ ;

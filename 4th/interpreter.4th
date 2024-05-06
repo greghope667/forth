@@ -11,8 +11,9 @@
 
 : dt>next ( dt -- dt | 0 ) @ ;
 : dt>name ( dt -- c-addr ) 5 + ;
+: dt>flags ( dt -- addr ) 4 + ;
 : dt>xt ( dt -- xt ) dt>name dup c@ + 1+ 2aligned ;
-: dt-immediate? ( dt -- f ) 4 + c@ 1 and ;
+: dt-immediate? ( dt -- f ) dt>flags c@ 1 and ;
 : dt<> ( caddr dt -- f ) dt>name dup c@ 1+ memcompare 0<> ;
 
 variable dictionary
@@ -116,7 +117,8 @@ variable data-pointer
 : quit begin refill drop interpret again ;
 
 : create-header ( -- dt )
-	align latest here !
+	align latest here ! ( dictionary link )
+	0 here dt>flags c! ( no flags )
 	here dup dt>xt data-pointer ! ;
 
 : create-codefield ( codefield -- ) , 0 , ;

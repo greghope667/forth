@@ -681,8 +681,11 @@ COLON	"dt>name", dt_name
 COLON	"dt>xt", dt_xt
 	dd	_dt_name, _dup, _c_fetch, _plus, _one_plus, _two_aligned, _e
 
-COLON	"dt-immediate>", dt_immediate
-	dd	_l, 4, _plus, _c_fetch, _l, 1, _and, _e
+COLON	"dt>flags", dt_flags
+	dd	_l, 4, _plus, _e
+
+COLON	"dt-immediate?", dt_immediate
+	dd	_dt_flags, _c_fetch, _l, 1, _and, _e
 
 COLON	"dt<>", dt_neq
 	dd	_dt_name, _dup, _c_fetch, _one_plus, _memcompare, _zero_not_equals, _e
@@ -803,6 +806,7 @@ COLON	"quit", quit
 
 COLON	"create-header", create_header
 	dd	_align, _latest, _here, _store
+	dd	_l, 0, _here, _dt_flags, _c_store
 	dd	_here, _dup, _dt_xt, _data_pointer, _store, _e
 
 COLON	"create-codefield", create_codefield
