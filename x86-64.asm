@@ -36,7 +36,8 @@
 
 macro NEXT {
 	lodsd				; W = (IP), IP++
-	jmp	qword [rax]		; jump (W)
+	mov	ecx, [rax]
+	jmp	rcx			; jump (W)
 }
 
 ; Push and pop to the return stack. This uses rbp instead of the hardware stack
@@ -59,8 +60,8 @@ macro POPRSP dest* {
 ;	Hid	1 bit		0 = visible, 1 = hidden
 ;   Len		1 byte		Length of name of word
 ;   Name	Len bytes	Name of word
-;   (padding to 8 bytes)
-;   Code field	8 bytes		Pointer to machine code routine
+;   (padding to 4 bytes)
+;   Code field	4 bytes		Pointer to machine code routine
 ;   Parameter	(remainder)	Data for word
 ;
 ;   +--------------------+
@@ -91,13 +92,13 @@ macro HEADER name*, xt_name*, flags=0 {
 	db	@f - $ - 1		; Name length
 	db	name			; Search name
 @@:
-	align	8
+	align	4
 _#xt_name:
 }
 
 macro CODE name*, xt_name* {
 	HEADER	name, xt_name
-	dq	$ + 8
+	dd	$ + 4
 code_#xt_name:
 }
 
@@ -433,11 +434,6 @@ CODE	"aligned", aligned
 	and	ebx, -4
 	NEXT
 
-CODE	"2aligned", two_aligned
-	add	ebx, 7
-	and	ebx, -8
-	NEXT
-
 ; Basic text-number conversions
 
 CODE	"str>num", str_to_num
@@ -551,7 +547,8 @@ CODE	"?dup", question_dup
 CODE	"execute", execute
 	mov	eax, ebx
 	pop	rbx
-	jmp	qword [rax]
+	mov	ecx, [rax]
+	jmp	rcx
 
 ; Looping constructs
 
@@ -584,7 +581,7 @@ CODE	"(of)", of
 
 code_docolon:
 	PUSHRSP	esi			; Save instruction pointer
-	lea	esi, [rax + 8]		; Parameter field address
+	lea	esi, [rax + 4]		; Parameter field address
 	NEXT
 
 CODE	"exit", e
@@ -599,40 +596,41 @@ CODE	"(lit)", l
 
 code_dovar:
 	push	rbx
-	lea	ebx, [rax + 8]		; Parameter field address
+	lea	ebx, [rax + 4]		; Parameter field address
 	NEXT
 
 code_doconst:
 	push	rbx
-	mov	ebx, [rax + 8]		; Parameter field contents
+	mov	ebx, [rax + 4]		; Parameter field contents
 	NEXT
 
 code_dodefer:
-	mov	eax, [rax + 8]
-	jmp	qword [rax]
+	mov	eax, [rax + 4]
+	mov	ecx, [rax]
+	jmp	rcx
 
 
 macro COLON name*, xt_name*, flags=0 {
 	HEADER	name, xt_name, flags
-	dq	code_docolon
+	dd	code_docolon
 }
 
 macro VARIABLE name*, xt_name*, value* {
 	HEADER	name, xt_name
-	dq	code_dovar
+	dd	code_dovar
 var_#xt_name:
 	dd	value
 }
 
 macro CONSTANT name*, xt_name*, value* {
 	HEADER	name, xt_name
-	dq	code_doconst
+	dd	code_doconst
 	dd	value
 }
 
 macro ALIAS name*, xt_name*, target* {
 	HEADER	name, xt_name
-	dq	code_dodefer
+	dd	code_dodefer
 	dd	target
 }
 
@@ -679,7 +677,7 @@ COLON	"dt>name", dt_name
 	dd	_l, 5, _plus, _e
 
 COLON	"dt>xt", dt_xt
-	dd	_dt_name, _dup, _c_fetch, _plus, _one_plus, _two_aligned, _e
+	dd	_dt_name, _dup, _c_fetch, _plus, _one_plus, _aligned, _e
 
 COLON	"dt>flags", dt_flags
 	dd	_l, 4, _plus, _e
@@ -809,9 +807,6 @@ COLON	"create-header", create_header
 	dd	_l, 0, _here, _dt_flags, _c_store
 	dd	_here, _dup, _dt_xt, _data_pointer, _store, _e
 
-COLON	"create-codefield", create_codefield
-	dd	_comma, _l, 0, _comma, _e
-
 COLON	"[", left_bracket, 1
 	dd	_l, 0, _state, _store, _e
 
@@ -820,7 +815,7 @@ COLON	"]", right_bracket
 
 COLON	":", colon
 	dd	_bl, _word, _drop, _create_header
-	dd	_l, code_docolon, _create_codefield
+	dd	_l, code_docolon, _comma
 	dd	_right_bracket, _e
 
 COLON	";", semicolon, 1
@@ -828,7 +823,7 @@ COLON	";", semicolon, 1
 
 COLON	"create-word", create_word
 	dd	_bl, _word, _drop, _create_header
-	dd	_swap, _create_codefield
+	dd	_swap, _comma
 	dd	_dict, _store, _e
 
 COLON	"constant", constant

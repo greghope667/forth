@@ -5,14 +5,13 @@
 : /string tuck - >r + r> ;
 
 : align here aligned data-pointer ! ;
-: 2align here 2aligned data-pointer ! ;
 
 \ type dt dictionary/name token
 
 : dt>next ( dt -- dt | 0 ) @ ;
 : dt>name ( dt -- c-addr ) 5 + ;
 : dt>flags ( dt -- addr ) 4 + ;
-: dt>xt ( dt -- xt ) dt>name dup c@ + 1+ 2aligned ;
+: dt>xt ( dt -- xt ) dt>name dup c@ + 1+ aligned ;
 : dt-immediate? ( dt -- f ) dt>flags c@ 1 and ;
 : dt<> ( caddr dt -- f ) dt>name dup c@ 1+ memcompare 0<> ;
 
@@ -121,16 +120,14 @@ variable data-pointer
 	0 here dt>flags c! ( no flags )
 	here dup dt>xt data-pointer ! ;
 
-: create-codefield ( codefield -- ) , 0 , ;
-
 : [ 0 state ! ; immediate
 : ] 1 state ! ;
 
-: : bl word drop create-header _code_docolon create-codefield ] ;
+: : bl word drop create-header _code_docolon , ] ;
 : ; dictionary ! ['] exit , postpone [ ;
 
 : create-word ( codefield -- )
-	bl word drop create-header swap , 0 , dictionary ! ;
+	bl word drop create-header swap , dictionary ! ;
 
 : constant _code_doconst create-word , ;
 : create _code_dovar create-word ;
