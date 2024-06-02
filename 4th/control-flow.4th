@@ -27,3 +27,17 @@ variable leave-list
 	['] unloop ,
 	; immediate
 ' r@ alias i
+
+variable unwind
+
+: catch
+	sp@ >r unwind >r rp@ unwind !
+	execute
+	r> unwind ! r> drop 0 ;
+
+: throw
+	?dup if
+		unwind @ rp!
+		r> unwind !
+		r> swap >r sp! drop r>
+	then ;
